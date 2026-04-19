@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "outlook-mcp-server"
-version = "1.4.0-magodev"
+version = "1.4.0+magodev"
 description = "MCP server for local Outlook Classic (COM). Fork with draft-first guardrails."
 authors = [
     {name = "MagoDev"},
@@ -45,10 +45,11 @@ Upstream = "https://github.com/marlonluo2018/outlook-mcp-server"
 
 [project.scripts]
 outlook-mcp-server = "outlook_mcp_server:main"
+outlook-export = "outlook_exporter.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["outlook_mcp_server*"]
+include = ["outlook_mcp_server*", "outlook_exporter*"]
 exclude = ["tests*", "tests", "test_*"]
 
 [tool.black]
