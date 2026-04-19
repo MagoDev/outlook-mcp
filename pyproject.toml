@@ -4,9 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "outlook-mcp-server"
-version = "1.3.0"
-description = "MCP server for Outlook email operations"
-authors = [{name = "marlonluo2018", email = "marlonluo2018@example.com"}]
+version = "1.4.0-magodev"
+description = "MCP server for local Outlook Classic (COM). Fork with draft-first guardrails."
+authors = [
+    {name = "MagoDev"},
+    {name = "marlonluo2018", email = "marlonluo2018@example.com"},
+]
 license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.8"
@@ -35,9 +38,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/marlonluo2018/outlook-mcp-server"
-Repository = "https://github.com/marlonluo2018/outlook-mcp-server"
-Issues = "https://github.com/marlonluo2018/outlook-mcp-server/issues"
+Homepage = "https://github.com/MagoDev/outlook-mcp"
+Repository = "https://github.com/MagoDev/outlook-mcp"
+Issues = "https://github.com/MagoDev/outlook-mcp/issues"
+Upstream = "https://github.com/marlonluo2018/outlook-mcp-server"
 
 [project.scripts]
 outlook-mcp-server = "outlook_mcp_server:main"

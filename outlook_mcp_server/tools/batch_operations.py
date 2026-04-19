@@ -6,10 +6,10 @@ from ..backend.validation import ValidationError
 
 
 def batch_forward_email_tool(email_number: int, csv_path: str, custom_text: str = "") -> Dict[str, Any]:
-    """Forward an email to recipients listed in a CSV file in batches of 500 (Outlook BCC limit).
+    """Create DRAFT forwards of an email to recipients from a CSV file, in batches of 500 (Outlook BCC limit). Does NOT send — the user must review and send each batch draft manually from Outlook Drafts.
 
-    This function uses an email from your cache as a template and forwards it to multiple recipients
-    from a CSV file. The email is sent via BCC to protect recipient privacy.
+    This function uses an email from your cache as a template and creates one draft per batch of up to 500
+    recipients (BCC) for privacy. No email is sent automatically.
 
     Args:
         email_number: The number of the email in the cache to use as template (1-based)
@@ -27,18 +27,15 @@ def batch_forward_email_tool(email_number: int, csv_path: str, custom_text: str 
         ```
 
     Returns:
-        dict: Response containing batch sending results
-        {
-            "type": "text",
-            "text": "Batch sending completed for X recipients in Y batches: [detailed results]"
-        }
+        dict: Response listing draft creation results with EntryIDs.
 
     Note:
-        - Maximum 500 recipients per batch due to Outlook BCC limitations
-        - Invalid email addresses in the CSV will be skipped with warnings
-        - The email is sent as BCC to protect recipient privacy
-        - Recipients will see it as a forwarded email with "FW:" prefix
-        - This function forwards existing emails, it does not compose new ones
+        - Maximum 500 recipients per batch draft (Outlook BCC limit).
+        - Invalid email addresses in the CSV are skipped with warnings.
+        - Drafts use BCC to protect recipient privacy.
+        - Forwarded drafts get the "FW:" prefix.
+        - This function forwards existing emails; it does not compose new ones.
+        - Drafts are never sent automatically — review and send manually.
     """
     if not isinstance(email_number, int) or email_number < 1:
         raise ValidationError("Email number must be a positive integer")

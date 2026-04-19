@@ -1,6 +1,20 @@
-# 🤖 Outlook MCP Server
+# Outlook MCP Server — MagoDev fork
 
-**AI-powered email management for Microsoft Outlook** - Search, compose, organize, and batch forward emails with natural language commands.
+> **Fork notice.** This repository is a fork of
+> [marlonluo2018/outlook-mcp-server](https://github.com/marlonluo2018/outlook-mcp-server)
+> with an added **draft-first guardrail**:
+>
+> - `compose_email_tool`, `reply_to_email_by_number_tool`, and `batch_forward_email_tool`
+>   **never send** emails. They create drafts in the Outlook Drafts folder and return the
+>   draft `EntryID`. The user must open Outlook and send manually.
+> - Every draft creation is appended to `~/.outlook-mcp/audit.log` (one JSON line per event).
+>
+> Everything else (search, list folders, move, delete, attachments, viewing) is unchanged
+> from upstream.
+
+---
+
+**AI-powered email management for Microsoft Outlook** - Search, compose drafts, organize, and batch forward drafts with natural language commands.
 
 <div align="center">
 

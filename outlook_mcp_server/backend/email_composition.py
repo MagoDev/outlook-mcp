@@ -4,6 +4,7 @@
 from typing import Any, Callable, Dict, List, Optional, Union
 
 # Local application imports
+from .audit import log_event
 from .logging_config import get_logger
 from .outlook_session.session_manager import OutlookSessionManager
 from .shared import email_cache, email_cache_order
@@ -276,9 +277,22 @@ def reply_to_email_by_number(
                     f"{reply_text_safe}\n\n{'_' * DisplayConstants.SEPARATOR_LINE_LENGTH}\n[Original email content unavailable]"
                 )
 
-            new_mail.Send()
-            logger.info(f"Successfully replied to email #{email_number}")
-            return f"Successfully replied to email #{email_number}"
+            # Draft-first guardrail: save as draft instead of sending.
+            # The user must review and send the draft from Outlook manually.
+            new_mail.Save()
+            draft_entry_id = getattr(new_mail, "EntryID", "")
+            log_event(
+                "reply_draft_created",
+                email_number=email_number,
+                draft_entry_id=draft_entry_id,
+                to=to_recipients,
+                cc=cc_recipients,
+            )
+            logger.info(f"Draft reply created for email #{email_number} (EntryID={draft_entry_id})")
+            return (
+                f"Draft reply to email #{email_number} saved to Drafts folder. "
+                f"Review and send it manually in Outlook. EntryID={draft_entry_id}"
+            )
 
         except Exception as e:
             logger.error(f"Error replying to email #{email_number}: {e}")
@@ -363,9 +377,23 @@ def compose_email(
                 logger.warning(f"Failed to set email body format, using plain text: {e}")
                 mail.Body = body_safe
 
-            mail.Send()
-            logger.info(f"Email sent successfully to {len(to_recipients)} recipients")
-            return "Email sent successfully"
+            # Draft-first guardrail: save as draft, do not send.
+            mail.Save()
+            draft_entry_id = getattr(mail, "EntryID", "")
+            log_event(
+                "compose_draft_created",
+                to=encoded_to,
+                cc=encoded_cc or None,
+                subject=subject_safe,
+                draft_entry_id=draft_entry_id,
+            )
+            logger.info(
+                f"Draft created for {len(to_recipients)} recipients (EntryID={draft_entry_id})"
+            )
+            return (
+                f"Draft saved to Drafts folder for {len(to_recipients)} recipient(s). "
+                f"Review and send it manually in Outlook. EntryID={draft_entry_id}"
+            )
 
         except Exception as e:
             logger.error(f"Error composing email: {e}")

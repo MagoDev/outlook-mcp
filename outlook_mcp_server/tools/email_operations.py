@@ -12,30 +12,22 @@ def reply_to_email_by_number_tool(
     to_recipients: Union[str, List[str], None] = None, 
     cc_recipients: Union[str, List[str], None] = None
 ) -> Dict[str, Any]:
-    """Reply to an email with custom recipients if provided
+    """Create a DRAFT reply to an email. Does NOT send — the user must review and send manually from Outlook Drafts.
 
     Args:
         email_number: Email's position in the last listing
         reply_text: Text to prepend to the reply
         to_recipients: Either a single email string OR a list of email strings (None preserves original recipients)
-                      Examples: "user@company.com" OR ["user@company.com", "boss@company.com"]
         cc_recipients: Either a single email string OR a list of email strings (None preserves original recipients)
-                      Examples: "user@company.com" OR ["user@company.com", "boss@company.com"]
 
     Behavior:
-        - When both to_recipients and cc_recipients are None:
-          * Uses ReplyAll() to maintain original recipients
-        - When either parameter is provided:
-          * Uses Reply() with specified recipients
-          * Any None parameters will result in empty recipient fields
-        - Single email strings and lists of email strings are both accepted
+        - Always creates a draft; never sends.
+        - When both to_recipients and cc_recipients are None, uses ReplyAll() to preserve original recipients.
+        - Otherwise uses Reply() with the provided recipients.
+        - Response contains the draft's EntryID so the user can locate it in Outlook.
 
     Returns:
-        dict: Response containing confirmation message
-        {
-            "type": "text",
-            "text": "Confirmation message here"
-        }
+        dict: {"type": "text", "text": "Draft reply ... saved to Drafts folder ..."}
     """
     if not isinstance(email_number, int) or email_number < 1:
         raise ValidationError("Email number must be a positive integer")
@@ -50,20 +42,16 @@ def reply_to_email_by_number_tool(
 
 
 def compose_email_tool(recipient_email: str, subject: str, body: str, cc_email: Optional[str] = None) -> Dict[str, Any]:
-    """Compose and send a new email
+    """Compose a new email as a DRAFT. Does NOT send — the user must review and send manually from Outlook Drafts.
 
     Args:
-        recipient_email: Email address(es) of the recipient(s) - can be single email or semicolon-separated list
-        subject: Subject line of the email
+        recipient_email: Email address(es) of the recipient(s) - single email or semicolon-separated list
+        subject: Subject line
         body: Main content of the email
-        cc_email: Optional CC email address(es) - can be single email or semicolon-separated list
+        cc_email: Optional CC address(es) - single email or semicolon-separated list
 
     Returns:
-        dict: Response containing confirmation message
-        {
-            "type": "text",
-            "text": "Confirmation message here"
-        }
+        dict: {"type": "text", "text": "Draft saved to Drafts folder ... EntryID=..."}
     """
     if not recipient_email or not isinstance(recipient_email, str):
         raise ValidationError("Recipient email must be a non-empty string")

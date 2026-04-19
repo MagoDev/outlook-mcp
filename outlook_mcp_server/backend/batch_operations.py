@@ -4,6 +4,7 @@
 import csv
 
 # Local application imports
+from .audit import log_event
 from .logging_config import get_logger
 from .outlook_session.session_manager import OutlookSessionManager
 from .shared import email_cache
@@ -162,16 +163,31 @@ def batch_forward_emails(email_number: int, csv_path: str, custom_text: str = ""
                         logger.error(f"Error processing batch body: {e}")
                         mail.Body = "[Content processing error - please view original email]"
 
-                    mail.Send()
-                    logger.info(f"Batch {i} sent to {len(batch)} recipients")
-                    results.append(f"Batch {i} sent to {len(batch)} recipients")
+                    # Draft-first guardrail: save as draft, do not send.
+                    mail.Save()
+                    draft_entry_id = getattr(mail, "EntryID", "")
+                    log_event(
+                        "batch_forward_draft_created",
+                        batch=i,
+                        recipients=len(batch),
+                        draft_entry_id=draft_entry_id,
+                    )
+                    logger.info(
+                        f"Batch {i} draft created for {len(batch)} recipients "
+                        f"(EntryID={draft_entry_id})"
+                    )
+                    results.append(
+                        f"Batch {i}: draft saved for {len(batch)} recipients "
+                        f"(EntryID={draft_entry_id})"
+                    )
                 except Exception as e:
                     logger.error(f"Error sending batch {i}: {e}")
                     results.append(f"Error sending batch {i}: {str(e)}")
 
         return "\n".join(
             [
-                f"Batch sending completed for {total_recipients} recipients in {len(batches)} batches:",
+                f"Batch drafts created for {total_recipients} recipients across {len(batches)} batches. "
+                f"Review and send manually from Outlook Drafts folder:",
                 *results,
             ]
         )
